@@ -1,5 +1,6 @@
 import Files from "./Files";
 import Permissions from "./Permissions";
+import About from "./About";
 
 export default class GDrive {
    static _urlFiles = "https://www.googleapis.com/drive/v3/files";
@@ -8,6 +9,7 @@ export default class GDrive {
    static init(params = {}) {
       GDrive.files = new Files(params.files);
       GDrive.permissions = new Permissions();
+      GDrive.about = new About();
    }
    
    static setAccessToken(accessToken) {

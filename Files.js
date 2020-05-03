@@ -1,4 +1,4 @@
-import RNFS from "react-native-fs";
+//import RNFS from "react-native-fs";
 import utf8 from "utf8";
 import {
    StaticUtils,
@@ -64,6 +64,13 @@ export default class Files {
          });
    }
    
+   copy (fileId, title, parents) {
+      let body = {'title' : title, 'parents': parents};
+      return fetch(`${GDrive._urlFiles}/${fileId}/copy`, {
+         method: "POST",
+         headers: GDrive._createHeaders()
+      })
+   }
    delete(fileId) {
       return fetch(`${GDrive._urlFiles}/${fileId}`, {
          method: "DELETE",
@@ -137,10 +144,11 @@ export default class Files {
          "Authorization": `Bearer ${GDrive.accessToken}`
       }, downloadFileOptions.headers);
       
-      return RNFS.downloadFile(downloadFileOptions);
+     // return RNFS.downloadFile(downloadFileOptions);
    }
    
    list(queryParams) {
+      console.log('react-native-google-drive-api-wrapper.list.queryParams: ', queryParams)
       return fetch(`${GDrive._urlFiles}${_stringifyQueryParams(queryParams)}`, {
          headers: GDrive._createHeaders()
       });
