@@ -1,9 +1,10 @@
 import Files from "./Files";
 import Permissions from "./Permissions";
 import About from "./About";
+import {_stringifyQueryParams } from "./Helper";
 
 export default class GDrive {
-   static _urlFiles = "https://www.googleapis.com/drive/v3/files";
+   static _urlFiles = "https://www.googleapis.com/drive/v2/files";
    static _contentTypeJson = "application/json; charset=UTF-8";
    
    static init(params = {}) {

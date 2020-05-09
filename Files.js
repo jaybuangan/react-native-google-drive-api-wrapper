@@ -5,22 +5,10 @@ import {
    ArrayStringifier
 } from "simple-common-utils";
 import GDrive from "./GDrive";
+import {_stringifyQueryParams } from "./Helper";
+const uploadUrl = "https://www.googleapis.com/upload/drive/v2/files";
 
-const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files";
 
-function _stringifyQueryParams(queryParams,
-   prefix = "?", separator = "&", quoteIfString)
-{
-   const array = [];
-   
-   Object.keys(queryParams).forEach(key => array.push(
-      `${key}=${StaticUtils.safeQuoteIfString(queryParams[key], quoteIfString)}`));
-   
-   return new ArrayStringifier(array)
-      .setPrefix(prefix)
-      .setSeparator(separator)
-      .process();
-}
 
 export default class Files {
    static mimeFolder = "application/vnd.google-apps.folder";
@@ -64,11 +52,15 @@ export default class Files {
          });
    }
    
-   copy (fileId, title, parents) {
-      let body = {'title' : title, 'parents': parents};
+   copy ({fileId, title, parents}) {
+      let metadata = {'title' : title, 'parents': parents};
+      const body = JSON.stringify(metadata);
       return fetch(`${GDrive._urlFiles}/${fileId}/copy`, {
          method: "POST",
-         headers: GDrive._createHeaders()
+         headers: GDrive._createHeaders(
+               GDrive._contentTypeJson,
+               body.length),
+         body
       })
    }
    delete(fileId) {
@@ -79,7 +71,7 @@ export default class Files {
    }
    
    async safeCreateFolder(metadata) {
-      let id = await this.getId(metadata.name, metadata.parents, Files.mimeFolder);
+      let id = await this.getId(metadata.title, metadata.parents, Files.mimeFolder);
       
       if (!id) {
          metadata.mimeType = Files.mimeFolder;
@@ -104,13 +96,15 @@ export default class Files {
       return id;
    }
    
-   async getId(name, parents, mimeType, trashed = false) {
-      const queryParams = {name, trashed};
+   async getId(title, parents, mimeType, trashed = false) {
+      //console.log('calling getId...')
+      const queryParams = {title, trashed};
       
       if (mimeType) {
          queryParams.mimeType = mimeType;
       }
       
+      //console.log('calling list from getId...')
       let result = await this.list({
          q: _stringifyQueryParams(queryParams, "",
             " and ", true) + ` and '${parents[0]}' in parents`
@@ -119,8 +113,10 @@ export default class Files {
       if (!result.ok) {
          throw result;
       }
-      
-      const file = (await result.json()).files[0];
+
+      const listResult = await result.json();
+      //console.log('getId.listResult: ', listResult)
+      const file = listResult.items[0];
       
       return file ? file.id : file;
    }
@@ -148,7 +144,8 @@ export default class Files {
    }
    
    list(queryParams) {
-      console.log('react-native-google-drive-api-wrapper.list.queryParams: ', queryParams)
+      //console.log('*********react-native-google-drive-api-wrapper.list.queryParams: ', queryParams)
+      console.log('_stringifyQueryParams: ', _stringifyQueryParams(queryParams))
       return fetch(`${GDrive._urlFiles}${_stringifyQueryParams(queryParams)}`, {
          headers: GDrive._createHeaders()
       });
