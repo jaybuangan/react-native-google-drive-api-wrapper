@@ -75,9 +75,11 @@ export default class Files {
       
       if (!id) {
          metadata.mimeType = Files.mimeFolder;
-         
+         metadata.parents = (metadata.parents != null) ? metadata.parents : 'root';
+
          const body = JSON.stringify(metadata);
          
+         console.log('safeCreateFolder.body: ', body)
          result = await fetch(GDrive._urlFiles, {
             method: "POST",
             headers: GDrive._createHeaders(
@@ -103,11 +105,12 @@ export default class Files {
       if (mimeType) {
          queryParams.mimeType = mimeType;
       }
-      
+
+      const parentsParam = (parents == null) ? 'root' : parents[0].id;
       //console.log('calling list from getId...')
       let result = await this.list({
          q: _stringifyQueryParams(queryParams, "",
-            " and ", true) + ` and '${parents[0]}' in parents`
+            " and ", true) + ` and '${parentsParam}' in parents`
       });
       
       if (!result.ok) {
