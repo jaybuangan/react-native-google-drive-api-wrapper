@@ -4,12 +4,10 @@ import {
    StaticUtils,
    ArrayStringifier
 } from "simple-common-utils";
-import GDrive from "./GDrive";
-import {_stringifyQueryParams } from "./Helper";
+import {_stringifyQueryParams, _createHeaders, _urlFiles, _contentTypeJson } from "./Helper";
+
+
 const uploadUrl = "https://www.googleapis.com/upload/drive/v2/files";
-
-
-
 export default class Files {
    static mimeFolder = "application/vnd.google-apps.folder";
    
@@ -27,7 +25,7 @@ export default class Files {
       const ending = `\n${ddb}--`;
       
       let body = `\n${ddb}\n` +
-         `Content-Type: ${GDrive._contentTypeJson}\n\n` +
+         `Content-Type: ${_contentTypeJson}\n\n` +
          `${JSON.stringify(metadata)}\n\n${ddb}\n` +
          (isBase64 ? "Content-Transfer-Encoding: base64\n" : '') +
          `Content-Type: ${mediaType}\n\n`;
@@ -44,7 +42,7 @@ export default class Files {
       return fetch(
          `${uploadUrl}?uploadType=multipart`, {
             method: "POST",
-            headers: GDrive._createHeaders(
+            headers: _createHeaders(
                `multipart/related; boundary=${this.params.boundary}`,
                body.length
             ),
@@ -55,18 +53,18 @@ export default class Files {
    copy ({fileId, title, parents}) {
       let metadata = {'title' : title, 'parents': parents};
       const body = JSON.stringify(metadata);
-      return fetch(`${GDrive._urlFiles}/${fileId}/copy`, {
+      return fetch(`${_urlFiles}/${fileId}/copy`, {
          method: "POST",
-         headers: GDrive._createHeaders(
-               GDrive._contentTypeJson,
+         headers: _createHeaders(
+               _contentTypeJson,
                body.length),
          body
       })
    }
    delete(fileId) {
-      return fetch(`${GDrive._urlFiles}/${fileId}`, {
+      return fetch(`${_urlFiles}/${fileId}`, {
          method: "DELETE",
-         headers: GDrive._createHeaders()
+         headers: _createHeaders()
       });
    }
    
@@ -79,11 +77,10 @@ export default class Files {
 
          const body = JSON.stringify(metadata);
          
-         console.log('safeCreateFolder.body: ', body)
-         result = await fetch(GDrive._urlFiles, {
+         result = await fetch(_urlFiles, {
             method: "POST",
-            headers: GDrive._createHeaders(
-               GDrive._contentTypeJson,
+            headers: _createHeaders(
+               _contentTypeJson,
                body.length),
             body
          });
@@ -99,7 +96,6 @@ export default class Files {
    }
    
    async getId(title, parents, mimeType, trashed = false) {
-      //console.log('calling getId...')
       const queryParams = {title, trashed};
       
       if (mimeType) {
@@ -107,7 +103,7 @@ export default class Files {
       }
 
       const parentsParam = (parents == null) ? 'root' : parents[0].id;
-      //console.log('calling list from getId...')
+      
       let result = await this.list({
          q: _stringifyQueryParams(queryParams, "",
             " and ", true) + ` and '${parentsParam}' in parents`
@@ -118,7 +114,6 @@ export default class Files {
       }
 
       const listResult = await result.json();
-      //console.log('getId.listResult: ', listResult)
       const file = listResult.items[0];
       
       return file ? file.id : file;
@@ -127,8 +122,8 @@ export default class Files {
    get(fileId, queryParams) {
       const parameters = _stringifyQueryParams(queryParams);
       
-      return fetch(`${GDrive._urlFiles}/${fileId}${parameters}`, {
-         headers: GDrive._createHeaders()
+      return fetch(`${_urlFiles}/${fileId}${parameters}`, {
+         headers: _createHeaders()
       });
    }
    
@@ -137,26 +132,24 @@ export default class Files {
       
       const parameters = _stringifyQueryParams(queryParams);
       
-      downloadFileOptions.fromUrl = `${GDrive._urlFiles}/${fileId}${parameters}`;
+      downloadFileOptions.fromUrl = `${_urlFiles}/${fileId}${parameters}`;
       
       downloadFileOptions.headers = Object.assign({
-         "Authorization": `Bearer ${GDrive.accessToken}`
+         "Authorization": `Bearer ${Helper.accessToken}`
       }, downloadFileOptions.headers);
       
      // return RNFS.downloadFile(downloadFileOptions);
    }
    
    list(queryParams) {
-      //console.log('*********react-native-google-drive-api-wrapper.list.queryParams: ', queryParams)
-      console.log('_stringifyQueryParams: ', _stringifyQueryParams(queryParams))
-      return fetch(`${GDrive._urlFiles}${_stringifyQueryParams(queryParams)}`, {
-         headers: GDrive._createHeaders()
+      return fetch(`${Helper._urlFiles}${_stringifyQueryParams(queryParams)}`, {
+         headers: _createHeaders()
       });
    }
    
    export(fileId, mimeType) {
-      return fetch(`${GDrive._urlFiles}/${fileId}/export?mimeType=${mimeType}`, {
-         headers: GDrive._createHeaders()
+      return fetch(`${Helper._urlFiles}/${fileId}/export?mimeType=${mimeType}`, {
+         headers: _createHeaders()
       });
    }
 }
