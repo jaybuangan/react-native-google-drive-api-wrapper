@@ -4,7 +4,7 @@ import {
    StaticUtils,
    ArrayStringifier
 } from "simple-common-utils";
-import {_stringifyQueryParams, _createHeaders, _urlFiles, _contentTypeJson } from "./Helper";
+import Helper from "./Helper";
 
 
 const uploadUrl = "https://www.googleapis.com/upload/drive/v2/files";
@@ -25,7 +25,7 @@ export default class Files {
       const ending = `\n${ddb}--`;
       
       let body = `\n${ddb}\n` +
-         `Content-Type: ${_contentTypeJson}\n\n` +
+         `Content-Type: ${Helper._contentTypeJson}\n\n` +
          `${JSON.stringify(metadata)}\n\n${ddb}\n` +
          (isBase64 ? "Content-Transfer-Encoding: base64\n" : '') +
          `Content-Type: ${mediaType}\n\n`;
@@ -42,7 +42,7 @@ export default class Files {
       return fetch(
          `${uploadUrl}?uploadType=multipart`, {
             method: "POST",
-            headers: _createHeaders(
+            headers: Helper._createHeaders(
                `multipart/related; boundary=${this.params.boundary}`,
                body.length
             ),
@@ -53,18 +53,18 @@ export default class Files {
    copy ({fileId, title, parents}) {
       let metadata = {'title' : title, 'parents': parents};
       const body = JSON.stringify(metadata);
-      return fetch(`${_urlFiles}/${fileId}/copy`, {
+      return fetch(`${Helper._urlFiles}/${fileId}/copy`, {
          method: "POST",
-         headers: _createHeaders(
-               _contentTypeJson,
+         headers: Helper._createHeaders(
+            Helper._contentTypeJson,
                body.length),
          body
       })
    }
    delete(fileId) {
-      return fetch(`${_urlFiles}/${fileId}`, {
+      return fetch(`${Helper._urlFiles}/${fileId}`, {
          method: "DELETE",
-         headers: _createHeaders()
+         headers: Helper._createHeaders()
       });
    }
    
@@ -77,10 +77,10 @@ export default class Files {
 
          const body = JSON.stringify(metadata);
          
-         result = await fetch(_urlFiles, {
+         result = await fetch(Helper._urlFiles, {
             method: "POST",
-            headers: _createHeaders(
-               _contentTypeJson,
+            headers: Helper._createHeaders(
+               Helper._contentTypeJson,
                body.length),
             body
          });
@@ -105,7 +105,7 @@ export default class Files {
       const parentsParam = (parents == null) ? 'root' : parents[0].id;
       
       let result = await this.list({
-         q: _stringifyQueryParams(queryParams, "",
+         q: Helper._stringifyQueryParams(queryParams, "",
             " and ", true) + ` and '${parentsParam}' in parents`
       });
       
@@ -120,36 +120,36 @@ export default class Files {
    }
    
    get(fileId, queryParams) {
-      const parameters = _stringifyQueryParams(queryParams);
+      const parameters = Helper._stringifyQueryParams(queryParams);
       
-      return fetch(`${_urlFiles}/${fileId}${parameters}`, {
-         headers: _createHeaders()
+      return fetch(`${Helper._urlFiles}/${fileId}${parameters}`, {
+         headers: Helper._createHeaders()
       });
    }
    
    download(fileId, downloadFileOptions, queryParams = {}) {
       queryParams.alt = "media";
       
-      const parameters = _stringifyQueryParams(queryParams);
+      const parameters = Helper._stringifyQueryParams(queryParams);
       
-      downloadFileOptions.fromUrl = `${_urlFiles}/${fileId}${parameters}`;
+      downloadFileOptions.fromUrl = `${Helper._urlFiles}/${fileId}${parameters}`;
       
       downloadFileOptions.headers = Object.assign({
-         "Authorization": `Bearer ${Helper.accessToken}`
+         "Authorization": `Bearer ${Helper._accessToken}`
       }, downloadFileOptions.headers);
       
      // return RNFS.downloadFile(downloadFileOptions);
    }
    
    list(queryParams) {
-      return fetch(`${Helper._urlFiles}${_stringifyQueryParams(queryParams)}`, {
-         headers: _createHeaders()
+      return fetch(`${Helper._urlFiles}${Helper._stringifyQueryParams(queryParams)}`, {
+         headers: Helper._createHeaders()
       });
    }
    
    export(fileId, mimeType) {
       return fetch(`${Helper._urlFiles}/${fileId}/export?mimeType=${mimeType}`, {
-         headers: _createHeaders()
+         headers: Helper._createHeaders()
       });
    }
 }

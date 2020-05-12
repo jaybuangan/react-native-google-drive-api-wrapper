@@ -1,5 +1,4 @@
-import GDrive from "./GDrive";
-import {_stringifyQueryParams } from "./Helper";
+import Helper from "./Helper";
 
 const properties = "/properties";
 
@@ -7,10 +6,10 @@ export default class Properties {
    insert({fileId, resource}) {
       const body = JSON.stringify(resource);
       
-      return fetch(`${GDrive._urlFiles}/${fileId}${properties}`, {
+      return fetch(`${Helper._urlFiles}/${fileId}${properties}`, {
          method: "POST",
-         headers: GDrive._createHeaders(
-            GDrive._contentTypeJson,
+         headers: Helper._createHeaders(
+            Helper._contentTypeJson,
             body.length
          ),
          body

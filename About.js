@@ -1,11 +1,11 @@
-import GDrive from "./GDrive";
-
-const about = "/about";
+import Helper from "./Helper";
 
 export default class About {
    get(fields) {
-      return fetch(`${GDrive._urlFiles}${about}`, {
-        headers: GDrive._createHeaders()
+    const parameters = Helper._stringifyQueryParams(fields);
+
+      return fetch(`${Helper._urlAbout}${parameters}`, {
+        headers: Helper._createHeaders()
       });
    }
 }

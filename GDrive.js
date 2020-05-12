@@ -13,11 +13,11 @@ export default class GDrive {
    }
    
    static setAccessToken(accessToken) {
-      Helper.accessToken = accessToken;
+      Helper._accessToken = accessToken;
    }
    
    static isInitialized() {
-      return !!Helper.accessToken;
+      return !!Helper._accessToken;
    }
    
    

@@ -5,10 +5,11 @@ import {
 
  export default class Helper {
     static _urlFiles = "https://www.googleapis.com/drive/v2/files";
+    static _urlAbout = "https://www.googleapis.com/drive/v2/about";
     static  _contentTypeJson = "application/json; charset=UTF-8";
+    static _accessToken = "";
 
-    static  _stringifyQueryParams = (queryParams,
-        prefix = "?", separator = "&", quoteIfString) => {
+    static _stringifyQueryParams = (queryParams, prefix = "?", separator = "&", quoteIfString) => {
         const array = [];
         
         Object.keys(queryParams).forEach(key => array.push(
@@ -21,9 +22,9 @@ import {
      }
 
      
-    static _createHeaders(contentType, contentLength, ... additionalPairs) {
+    static _createHeaders = (contentType, contentLength, ... additionalPairs) => {
         let pairs = [
-        [ "Authorization", `Bearer ${GDrive.accessToken}` ]
+        [ "Authorization", `Bearer ${this._accessToken}` ]
         ];
         
         [
